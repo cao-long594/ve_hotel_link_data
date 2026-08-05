@@ -18,11 +18,11 @@ import cn.vetech.center.hotel.link.ylfx.data.YlfxHotelDetailService;
 import cn.vetech.center.hotel.link.ylfx.data.v2.YlfxV2HotelCodeService;
 import cn.vetech.charge.cloud.exception.SystemException;
 import cn.vetech.charge.cloud.springcloud.api.RestResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -32,6 +32,9 @@ import java.util.List;
  */
 @Service
 public class YlfxHotelLinkDataSupplyService implements IHotelLinkDataSupplyService {
+    /**
+     * 日志
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(YlfxHotelLinkDataSupplyService.class);
     /**
      * 酒店静态
@@ -39,7 +42,7 @@ public class YlfxHotelLinkDataSupplyService implements IHotelLinkDataSupplyServi
     @Autowired
     private YlfxHotelDetailService hotelDetailService;
     /**
-     * V2 hotel static services.
+     * V2 酒店静态
      */
     @Autowired
     private YlfxV2HotelCodeService v2HotelCodeService;
@@ -52,7 +55,7 @@ public class YlfxHotelLinkDataSupplyService implements IHotelLinkDataSupplyServi
    @Override
     public RestResponse<List<HotelIdVO>> getHotelIdList(HotelListDTO dto) throws SystemException {
         YlfxConfig config = SupplierConfigUtils.parse(dto.getSupplier(), YlfxConfig.class);
-        if (YlfxV2HotelCodeService.isV2(config)) {
+        if ("v2".equals(config.getApiVersion())) {
             return v2HotelCodeService.getHotelIdList(config);
         }
         if (StringUtils.isNotBlank(config.getApiVersion())) {

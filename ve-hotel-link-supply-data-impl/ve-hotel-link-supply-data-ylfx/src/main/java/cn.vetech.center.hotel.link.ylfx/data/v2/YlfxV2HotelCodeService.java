@@ -26,26 +26,39 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 易旅分销 V2 酒店静态服务。
+ * 易旅分销 V2 酒店静态服务
+ *
+ * @author 6161
+ * @date 2026/08/05
  */
 @Service
 public class YlfxV2HotelCodeService {
+    /**
+     * 日志
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(YlfxV2HotelCodeService.class);
-    private static final String API_VERSION_V2 = "v2";
+    /**
+     * 可同步酒店编码接口
+     */
     private static final String HOTEL_CODES_URI = "/open/static/hotelcodes";
 
+    /**
+     * HTTP 请求服务
+     */
     @Autowired
     private HttpService httpService;
 
-    public static boolean isV2(YlfxConfig config) {
-        return config != null && StringUtils.equalsIgnoreCase(API_VERSION_V2, config.getApiVersion());
-    }
-
+    /**
+     * 获取可同步酒店编码列表
+     *
+     * @param config 供应商配置
+     * @return 酒店编码列表
+     * @throws SystemException 系统异常
+     */
     public RestResponse<List<HotelIdVO>> getHotelIdList(YlfxConfig config) throws SystemException {
-        String configError = validateConfig(config);
-        if (StringUtils.isNotBlank(configError)) {
-            LOGGER.warn("易旅分销 V2 酒店编码接口配置错误: {}", configError);
-            return ApiRes.response(DataResponseEnum.SUPPLIER_EXCEPTION, configError);
+        if (!checkConfig(config)) {
+            LOGGER.warn("易旅分销 V2 酒店编码接口供应商配置不完整");
+            return ApiRes.response(DataResponseEnum.SUPPLIER_CONFIG_GET_FAILED);
         }
 
         try {
@@ -75,14 +88,26 @@ public class YlfxV2HotelCodeService {
         }
     }
 
-    private String validateConfig(YlfxConfig config) {
+    /**
+     * 校验 V2 接口配置
+     *
+     * @param config 供应商配置
+     * @return true：校验通过；false：校验失败
+     */
+    private boolean checkConfig(YlfxConfig config) {
         if (config == null || StringUtils.isAnyBlank(config.getUrl(), config.getAppid(),
                 config.getSecret(), config.getCustomerCode())) {
-            return "易旅分销 V2 配置不完整";
+            return false;
         }
-        return null;
+        return true;
     }
 
+    /**
+     * 转换标准酒店编码
+     *
+     * @param hotelCodes 易旅酒店编码
+     * @return 标准酒店编码
+     */
     private List<HotelIdVO> convertHotelIds(List<String> hotelCodes) {
         return hotelCodes.stream()
                 .filter(StringUtils::isNotBlank)
