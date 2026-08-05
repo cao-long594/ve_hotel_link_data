@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+cn.vetech.center.hotel.mapping.service.MappingSystemInvokerService,\
+  cn.vetech.center.price.hotel.lowprice.service.PriceSystemInvokerService
