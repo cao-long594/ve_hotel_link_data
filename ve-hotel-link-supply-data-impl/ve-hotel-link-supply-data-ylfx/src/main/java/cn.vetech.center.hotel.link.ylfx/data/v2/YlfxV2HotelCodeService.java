@@ -13,6 +13,7 @@ import cn.vetech.center.hotel.link.ylfx.data.v2.request.YlfxV2HotelCodesRequest;
 import cn.vetech.center.hotel.link.ylfx.data.v2.response.YlfxV2HotelCodesResponse;
 import cn.vetech.charge.cloud.exception.SystemException;
 import cn.vetech.charge.cloud.modules.utils.time.VeDate;
+import cn.vetech.charge.cloud.modules.utils.security.MD5Tool;
 import cn.vetech.charge.cloud.springcloud.api.RestResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,10 +66,14 @@ public class YlfxV2HotelCodeService {
             YlfxV2HotelCodesRequest request = new YlfxV2HotelCodesRequest();
             request.setCustomerCode(config.getCustomerCode());
             request.setDomestic(1);
-            String url = UrlUtils.completeUrl(config.getUrl(), HOTEL_CODES_URI);
+            String url = UrlUtils.completeUrl(StringUtils.defaultIfBlank(config.getNewUrl(), config.getUrl()), HOTEL_CODES_URI);
             String requestBody = JacksonUtils.toJsonWithNonEmpty(request);
             Map<String, String> headers = HttpClientUtilExt.headMapJson();
-            headers.put("appid", config.getAppid());
+            String appid = StringUtils.defaultIfBlank(config.getAppid(), config.getAppId());
+            headers.put("appid", appid);
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            headers.put("timestamp", timestamp);
+            headers.put("signature", MD5Tool.MD5Encode(MD5Tool.MD5Encode(appid + config.getSecret()) + timestamp));
 
             String responseBody = httpService.doPostBody(url, requestBody, headers);
             YlfxV2HotelCodesResponse response = JacksonUtils.parseNonEmpty(responseBody, YlfxV2HotelCodesResponse.class);
@@ -95,7 +100,7 @@ public class YlfxV2HotelCodeService {
      * @return true：校验通过；false：校验失败
      */
     private boolean checkConfig(YlfxConfig config) {
-        if (config == null || StringUtils.isAnyBlank(config.getUrl(), config.getAppid(),
+        if (config == null || StringUtils.isAnyBlank(StringUtils.defaultIfBlank(config.getNewUrl(), config.getUrl()), StringUtils.defaultIfBlank(config.getAppid(), config.getAppId()),
                 config.getSecret(), config.getCustomerCode())) {
             return false;
         }

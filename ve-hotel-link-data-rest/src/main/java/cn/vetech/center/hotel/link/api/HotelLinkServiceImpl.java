@@ -59,5 +59,8 @@ public class HotelLinkServiceImpl extends AbstractHotelLinkService {
         return ApiRes.success();
     }
 
-
+    @Override
+    public RestResponse<LinkHotelOrderReviewVO> orderReview(LinkHotelOrderReviewDTO dto) {
+        return null;
+    }
 }

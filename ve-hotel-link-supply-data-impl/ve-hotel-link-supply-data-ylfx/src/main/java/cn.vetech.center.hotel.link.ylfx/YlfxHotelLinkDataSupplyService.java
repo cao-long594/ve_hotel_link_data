@@ -16,6 +16,7 @@ import cn.vetech.center.hotel.link.supply.ylfx.common.YlfxConfig;
 import cn.vetech.center.hotel.link.util.ApiRes;
 import cn.vetech.center.hotel.link.ylfx.data.YlfxHotelDetailService;
 import cn.vetech.center.hotel.link.ylfx.data.v2.YlfxV2HotelCodeService;
+import cn.vetech.center.hotel.link.ylfx.data.v2.YlfxV2HotelDetailService;
 import cn.vetech.charge.cloud.exception.SystemException;
 import cn.vetech.charge.cloud.springcloud.api.RestResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +47,9 @@ public class YlfxHotelLinkDataSupplyService implements IHotelLinkDataSupplyServi
      */
     @Autowired
     private YlfxV2HotelCodeService v2HotelCodeService;
+    /** V2 酒店详情 */
+    @Autowired
+    private YlfxV2HotelDetailService v2HotelDetailService;
 
     @Override
     public RestResponse<HotelInitVO> init(HotelBaseDTO dto) throws SystemException {
@@ -67,6 +71,9 @@ public class YlfxHotelLinkDataSupplyService implements IHotelLinkDataSupplyServi
     @Override
     public RestResponse<HotelInfoResponseVO> getHotelDetailByHotelId(HotelDetailHotleIdDTO dto) throws SystemException {
         YlfxConfig config = SupplierConfigUtils.parse(dto.getSupplier(), YlfxConfig.class);
+        if ("v2".equals(config.getApiVersion())) {
+            return v2HotelDetailService.getHotelDetailByHotelId(dto, config);
+        }
         return hotelDetailService.getHotelDetailByHotelId(dto, config);
     }
 
